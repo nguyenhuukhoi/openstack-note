@@ -19,8 +19,6 @@ https://docs.openstack.org/kolla-ansible/yoga/admin/tls.html
 
 ## Setup Keystone
 
-https://docs.openstack.org/skyline-console/latest/install/docker-install-ubuntu.html
-
 You should these files:
 
 /etc/kolla/config/keystone/mapping/accounts.google.com.provider
@@ -38,7 +36,10 @@ https://accounts.google.com/.well-known/openid-configuration
 ````
 /etc/kolla/config/keystone/mapping/accounts.google.com.conf
 ````
+{}
 ````
+nano /etc/kolla/globals.yml
+
 ````
 keystone_identity_providers:
   - name: "myidp"
