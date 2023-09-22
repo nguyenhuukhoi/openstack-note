@@ -38,6 +38,31 @@ https://accounts.google.com/.well-known/openid-configuration
 ````
 {}
 ````
+
+/etc/kolla/config/keystone/mapping/google.json
+
+````
+[
+  {
+    "local": [
+        {
+        "group": {
+          "id": "4d04f5b35b8849baba2a4bfdb9ce8441"
+          }
+        }
+    ],
+    "remote": [
+        {
+        "type": "HTTP_OIDC_ISS",
+        "any_one_of": [
+          "https://accounts.google.com"
+          ]
+        }
+    ]
+  }
+]
+
+````
 nano /etc/kolla/globals.yml
 
 ````
