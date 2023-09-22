@@ -26,9 +26,9 @@ You should these files:
 /etc/kolla/config/keystone/mapping/accounts.google.com.provider
 
 use content of file below
-````
+
 https://accounts.google.com/.well-known/openid-configuration
-````
+
 /etc/kolla/config/keystone/mapping/accounts.google.com.client
 ````
 {
