@@ -61,6 +61,8 @@ trusted_dashboard = https://domainame.fpt.net:9999/api/openstack/skyline/api/v1/
 ````
 *** domainname which mapped to skyline host
 
+reference https://docs.openstack.org/kolla-ansible/latest/contributor/setup-identity-provider.html
+
 ## Setup Skyline
 
 https://docs.openstack.org/skyline-console/latest/install/docker-install-ubuntu.html
