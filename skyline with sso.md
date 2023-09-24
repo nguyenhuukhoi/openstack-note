@@ -82,7 +82,7 @@ nano /etc/kolla/config/keystone.conf
 
 ````
 [federation]
-trusted_dashboard = https://domainame.fpt.net:9999/api/openstack/skyline/api/v1/websso
+trusted_dashboard = https://domainame.abc.net:9999/api/openstack/skyline/api/v1/websso
 ````
 *** domainname which mapped to skyline host
 
