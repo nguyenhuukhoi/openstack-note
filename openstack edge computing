@@ -2,7 +2,7 @@ Setup Glance with multistores
 
 Setup all glance stores at the central site, default glance store is central store and enable it. glance-api.conf
 
-Setup remote site store only, set default store to this site and enable it. 
+Setup remote site and enable all store, set default store to this site. 
 
 Computes which are at the remotes site will be conigure cinder and nova to use glance at remote site
 
