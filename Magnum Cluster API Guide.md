@@ -22,4 +22,6 @@ mv linux-amd64/helm /usr/local/bin/
 
 We need helm to make this work. Because There is no helm in magnum containers.
 
+Copy  /root/.kube/config from cluster management to /var/lib/magnum/.kube/config
+
 
