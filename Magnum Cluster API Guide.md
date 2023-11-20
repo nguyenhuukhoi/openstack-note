@@ -1,6 +1,7 @@
 Requirements:
 - Openstack Cluster was deployed by Kolla-Ansbile
 - Octavia must work.
+- Cinder(optional)
 
 # Install K8S cluster management
 We setup a k8s cluster to manage workload clusters which were created by Magnum.
