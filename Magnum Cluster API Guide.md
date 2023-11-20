@@ -1,5 +1,5 @@
 Requirements:
-- Openstack Cluster was deployed by Kolla-Ansbile
+- Openstack Cluster was deployed by Kolla-Ansbile# I tested on Openstack Yoga
 - Octavia must work.
 - Cinder(optional)
 
@@ -24,5 +24,11 @@ mv linux-amd64/helm /usr/local/bin/
 We need helm to make this work. Because There is no helm in magnum containers.
 
 Copy  /root/.kube/config from cluster management to /var/lib/magnum/.kube/config
+
+* I tested on runtime container. If you want to build images. You must do above steps when use Kolla build. You need read followed link too.
+  
+  https://review.opendev.org/c/openstack/kolla-ansible/+/896292
+
+
 
 
