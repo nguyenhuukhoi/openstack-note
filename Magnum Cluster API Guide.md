@@ -29,6 +29,9 @@ Copy  /root/.kube/config from cluster management to /var/lib/magnum/.kube/config
   
   https://review.opendev.org/c/openstack/kolla-ansible/+/896292
 
+# How use Magnum CAPI
+
+https://vexxhost.github.io/magnum-cluster-api/user/getting-started/
 
 
 
