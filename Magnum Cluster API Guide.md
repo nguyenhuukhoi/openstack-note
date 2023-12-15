@@ -8,6 +8,8 @@ We setup a k8s cluster to manage workload clusters which were created by Magnum.
 
 We need get /root/.kube/config from cluster management.
 
+https://cluster-api.sigs.k8s.io/user/quick-start.html
+
 # Magnum
 
 We need log in(as root) to magnum api and magnum conductor and install 
