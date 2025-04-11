@@ -1,4 +1,3 @@
-
 use crate::{
     clients::kubernetes,
     cluster_api::{kubeadmcontrolplane::KubeadmControlPlane, machines::Machine},
