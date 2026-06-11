@@ -255,7 +255,105 @@ Octavia worker vẫn báo AmpConnectionRetry do TLS expired sau khi reconfigure/
 
 Với LB topology `SINGLE`, failover có downtime. Với `ACTIVE_STANDBY`, vẫn nên thực hiện theo từng LB và có cửa sổ bảo trì nếu là production.
 
-## 8. Rollback
+## 8. Failover từng amphora
+
+Nếu một load balancer dùng topology `ACTIVE_STANDBY`, có thể failover từng amphora thay vì failover cả load balancer một lần. Cách này giúp kiểm soát rủi ro tốt hơn khi cần xử lý nhiều LB.
+
+Lấy danh sách amphora của một LB:
+
+```bash
+openstack loadbalancer amphora list --loadbalancer <lb-id>
+```
+
+Ghi lại `id`, `role`, `status` và `lb_network_ip` của từng amphora:
+
+```text
+BACKUP
+MASTER
+```
+
+Thứ tự khuyến nghị với `ACTIVE_STANDBY`:
+
+```text
+1. Failover BACKUP trước.
+2. Chờ amphora mới lên ổn định.
+3. Verify mTLS tới amphora mới.
+4. Sau đó mới failover MASTER.
+```
+
+Failover amphora `BACKUP`:
+
+```bash
+openstack loadbalancer amphora failover --wait <backup-amphora-id>
+```
+
+Kiểm tra lại amphora của LB:
+
+```bash
+openstack loadbalancer amphora list --loadbalancer <lb-id>
+```
+
+Lấy `lb_network_ip` của amphora mới, rồi verify mTLS:
+
+```bash
+echo | openssl s_client \
+  -connect <new_backup_amphora_lb_network_ip>:9443 \
+  -cert /etc/kolla/config/octavia/client.cert-and-key.pem \
+  -key /etc/kolla/config/octavia/client.cert-and-key.pem \
+  -CAfile /etc/kolla/config/octavia/server_ca.cert.pem \
+  -verify_return_error \
+  -brief
+```
+
+Nếu path `server_ca.cert.pem` không có ở `/etc/kolla/config/octavia`, dùng CA trong workdir:
+
+```bash
+echo | openssl s_client \
+  -connect <new_backup_amphora_lb_network_ip>:9443 \
+  -cert /etc/kolla/config/octavia/client.cert-and-key.pem \
+  -key /etc/kolla/config/octavia/client.cert-and-key.pem \
+  -CAfile /etc/kolla/octavia-certificates/server_ca/server_ca.cert.pem \
+  -verify_return_error \
+  -brief
+```
+
+Khi `BACKUP` mới đã ổn, tiếp tục failover `MASTER`:
+
+```bash
+openstack loadbalancer amphora failover --wait <master-amphora-id>
+```
+
+Sau đó kiểm tra lại:
+
+```bash
+openstack loadbalancer show <lb-id>
+openstack loadbalancer amphora list --loadbalancer <lb-id>
+```
+
+Kiểm tra log Octavia:
+
+```bash
+docker logs --since 10m octavia_worker 2>&1 | egrep 'certificate expired|certificate verify failed|AmpConnectionRetry|ComputeWaitTimeout'
+docker logs --since 10m octavia_health_manager 2>&1 | egrep 'certificate expired|certificate verify failed|AmpConnectionRetry'
+```
+
+Với Podman:
+
+```bash
+podman logs --since 10m octavia_worker 2>&1 | egrep 'certificate expired|certificate verify failed|AmpConnectionRetry|ComputeWaitTimeout'
+podman logs --since 10m octavia_health_manager 2>&1 | egrep 'certificate expired|certificate verify failed|AmpConnectionRetry'
+```
+
+Lưu ý:
+
+```text
+Không chạy failover quá nhiều amphora cùng lúc.
+Nên làm canary 1 LB trước.
+Sau đó chạy theo batch nhỏ, ví dụ 3-5 LB/lượt.
+Với LB topology SINGLE, failover amphora gần như tương đương thay toàn bộ dataplane và có downtime.
+```
+
+## 9. Rollback
 
 Nếu cần quay lại backup:
 
@@ -274,4 +372,5 @@ Sau rollback, kiểm tra lại ngày hết hạn và log. Nếu rollback về ce
 - Kolla-Ansible `stable/2025.1` role `octavia-certificates`: https://opendev.org/openstack/kolla-ansible/src/branch/stable/2025.1/ansible/roles/octavia-certificates
 - Kolla-Ansible `stable/2025.1` defaults for Octavia certificate expiry: https://opendev.org/openstack/kolla-ansible/src/branch/stable/2025.1/ansible/roles/octavia-certificates/defaults/main.yml
 - Kolla-Ansible `stable/2025.1` client certificate generation task: https://opendev.org/openstack/kolla-ansible/src/branch/stable/2025.1/ansible/roles/octavia-certificates/tasks/client_cert.yml
+- OpenStackClient Octavia CLI, including amphora failover: https://docs.openstack.org/python-octaviaclient/2025.1/cli/index.html
 - OpenSSL `ca` manual, including `-updatedb`: https://docs.openssl.org/1.1.1/man1/ca/
