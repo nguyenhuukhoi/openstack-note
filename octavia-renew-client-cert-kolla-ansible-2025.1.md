@@ -174,64 +174,7 @@ Kết quả mong đợi:
 kolla-ansible -i <inventory> reconfigure --tags octavia
 ```
 
-Nếu muốn chắc chắn các service Octavia load cert mới ngay:
-
-```bash
-docker restart octavia_worker octavia_health_manager octavia_housekeeping
-```
-
-Hoặc nếu môi trường dùng Podman:
-
-```bash
-podman restart octavia_worker octavia_health_manager octavia_housekeeping
-```
-
-## 6. Verify Octavia control được amphora cũ
-
-Lấy danh sách amphora:
-
-```bash
-. /etc/kolla/admin-openrc.sh
-openstack loadbalancer amphora list
-```
-
-Chọn một amphora cũ, lấy `lb_network_ip`, rồi test mTLS từ node có đường tới Octavia management network:
-
-```bash
-echo | openssl s_client \
-  -connect <amphora_lb_network_ip>:9443 \
-  -cert /etc/kolla/config/octavia/client.cert-and-key.pem \
-  -key /etc/kolla/config/octavia/client.cert-and-key.pem \
-  -CAfile /etc/kolla/config/octavia/server_ca.cert.pem \
-  -verify_return_error \
-  -brief
-```
-
-Kết quả mong đợi:
-
-```text
-Không còn certificate expired
-Không còn SSLV3_ALERT_CERTIFICATE_EXPIRED
-Handshake TLS thành công
-```
-
-Kiểm tra log Octavia sau khi apply:
-
-```bash
-docker logs --since 5m octavia_worker 2>&1 | egrep 'certificate expired|SSLV3_ALERT_CERTIFICATE_EXPIRED|AmpConnectionRetry'
-docker logs --since 5m octavia_health_manager 2>&1 | egrep 'certificate expired|SSLV3_ALERT_CERTIFICATE_EXPIRED|AmpConnectionRetry'
-```
-
-Hoặc với Podman:
-
-```bash
-podman logs --since 5m octavia_worker 2>&1 | egrep 'certificate expired|SSLV3_ALERT_CERTIFICATE_EXPIRED|AmpConnectionRetry'
-podman logs --since 5m octavia_health_manager 2>&1 | egrep 'certificate expired|SSLV3_ALERT_CERTIFICATE_EXPIRED|AmpConnectionRetry'
-```
-
-Nếu không còn log lỗi TLS expired và mTLS tới amphora cũ thành công, không cần failover các LB cũ.
-
-## 7. Khi nào cần failover amphora
+## 6. Khi nào cần failover amphora
 
 Không cần failover nếu tất cả điều kiện sau đúng:
 
@@ -255,7 +198,7 @@ Octavia worker vẫn báo AmpConnectionRetry do TLS expired sau khi reconfigure/
 
 Với LB topology `SINGLE`, failover có downtime. Với `ACTIVE_STANDBY`, vẫn nên thực hiện theo từng LB và có cửa sổ bảo trì nếu là production.
 
-## 8. Failover từng amphora
+## 7. Failover từng amphora
 
 Nếu một load balancer dùng topology `ACTIVE_STANDBY`, có thể failover từng amphora thay vì failover cả load balancer một lần. Cách này giúp kiểm soát rủi ro tốt hơn khi cần xử lý nhiều LB.
 
@@ -378,7 +321,7 @@ Sau đó chạy theo batch nhỏ, ví dụ 3-5 LB/lượt.
 Với LB topology SINGLE, failover amphora gần như tương đương thay toàn bộ dataplane và có downtime.
 ```
 
-## 9. Rollback
+## 8. Rollback
 
 Nếu cần quay lại backup:
 
