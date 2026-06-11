@@ -281,6 +281,31 @@ Thứ tự khuyến nghị với `ACTIVE_STANDBY`:
 4. Sau đó mới failover MASTER.
 ```
 
+Lệnh chạy failover tuần tự cho một LB `ACTIVE_STANDBY`:
+
+```bash
+LB_ID=<lb-id>
+
+openstack loadbalancer amphora list --loadbalancer "$LB_ID"
+
+BACKUP_AMP=$(openstack loadbalancer amphora list --loadbalancer "$LB_ID" -f value -c id -c role | awk '$2=="BACKUP"{print $1; exit}')
+MASTER_AMP=$(openstack loadbalancer amphora list --loadbalancer "$LB_ID" -f value -c id -c role | awk '$2=="MASTER"{print $1; exit}')
+
+echo "Failover BACKUP amphora: $BACKUP_AMP"
+openstack loadbalancer amphora failover --wait "$BACKUP_AMP"
+
+openstack loadbalancer amphora list --loadbalancer "$LB_ID"
+openstack loadbalancer show "$LB_ID"
+
+echo "Failover MASTER amphora: $MASTER_AMP"
+openstack loadbalancer amphora failover --wait "$MASTER_AMP"
+
+openstack loadbalancer amphora list --loadbalancer "$LB_ID"
+openstack loadbalancer show "$LB_ID"
+```
+
+Nếu muốn chạy cẩn thận hơn, sau khi failover `BACKUP`, kiểm tra LB/amphora đã ổn rồi mới chạy phần `MASTER`.
+
 Failover amphora `BACKUP`:
 
 ```bash
